@@ -4,15 +4,19 @@ using UnityEngine;
 
 public class Dropper : MonoBehaviour
 {
-    int seconds = 0;
+    [SerializeField] float timeTowait = 5f;
+
     void Start()
     {
         
     }
 
-    // Update is called once per frame
+   
     void Update()
     {      
-            Debug.Log(Time.time);   
+        if(Time.time > timeTowait)
+        {
+            Debug.Log("3 seconds has elapsed");
+        }
     }
 }
