@@ -4,29 +4,62 @@ using UnityEngine;
 
 public class Mover : MonoBehaviour
 {
-    [SerializeField] float moveSpeed = 10f;
+   
+    [SerializeField] float speed;
+    [SerializeField] float rotationSpeed;
+    [SerializeField] float jumpSpeed;
+
+    private CharacterController characterController;
+    private float ySpeed;
+    private float originalStepOffset;
 
     void Start()
     {
-        PrintInstruction();
+        characterController = GetComponent<CharacterController>();
+        originalStepOffset = characterController.stepOffset;
     }
 
     void Update()
     {
-        MovePlayer();
+         MovePlayer();
     }
-
-    void PrintInstruction()
-    {
-        Debug.Log("Welcome to the game");
-        Debug.Log("Move your player with WASD or arrow keys");
-        Debug.Log("Don't hit the walls!");
-    }
-
+    
     void MovePlayer()
+{
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+
+        Vector3 movementDirection = new Vector3(horizontalInput, 0, verticalInput);
+        float magnitude = Mathf.Clamp01(movementDirection.magnitude) * speed;
+        movementDirection.Normalize();
+
+        ySpeed += Physics.gravity.y * Time.deltaTime;
+
+        if (characterController.isGrounded)
     {
-        float xValue = Input.GetAxis("Horizontal") * Time.deltaTime * moveSpeed;
-        float zValue = Input.GetAxis("Vertical") * Time.deltaTime * moveSpeed;
-        transform.Translate(xValue,0,zValue); 
+        characterController.stepOffset = originalStepOffset;
+        ySpeed = -0.5f;
+
+        if(Input.GetButtonDown("Jump"))
+
+        {
+            ySpeed = jumpSpeed;
+        }
+    }
+    else
+    {
+        characterController.stepOffset = 0;
+    }
+       
+        Vector3 velocity = movementDirection * magnitude;
+        velocity.y = ySpeed;
+        characterController.Move(velocity * Time.deltaTime);
+        
+        if (movementDirection != Vector3.zero)
+
+        {
+            Quaternion toRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);            
+        }
     }
 }
